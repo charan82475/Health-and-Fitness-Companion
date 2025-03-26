@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Meal Tracking - HFC</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #50e3c2;
+            --accent-color: #ff6b6b;
+            --background-light: #f8f9fa;
+            --card-bg: #ffffff;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --text-dark: #333333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: var(--background-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color) 30%, var(--secondary-color));
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-btn {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: calc(100vh - 80px);
+            margin: 2rem auto;
+            max-width: 1400px;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            margin-right: 2rem;
+            padding: 2rem;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 1rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: var(--background-light);
+            transform: translateX(5px);
+        }
+
+        .main-content {
+            flex: 1;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .meal-form {
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid var(--background-light);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+        }
+
+        .nutrition-facts {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 16px;
+            margin: 2rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nutrition-facts::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                var(--primary-color) 33%, 
+                var(--secondary-color) 33% 66%, 
+                var(--accent-color) 66%);
+        }
+
+        .macro-bars {
+            display: flex;
+            gap: 0.5rem;
+            margin: 2rem 0;
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .macro-bar {
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+
+        .calorie-goal {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 2rem 0;
+        }
+
+        .progress-ring {
+            width: 100px;
+            height: 100px;
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring circle {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+        }
+
+        .meal-card {
+            padding: 1.5rem;
+            background: var(--card-bg);
+            border-radius: 12px;
+            margin: 1rem 0;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .meal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .meal-card::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--primary-color);
+            border-radius: 4px 0 0 4px;
+        }
+
+        .delete-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background: #ff5252;
+        }
+
+        .nutrition-chart {
+            margin: 1rem 0; /* Reduced margin */
+            background: var(--card-bg);
+            padding: 1rem; /* Reduced padding */
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            max-width: 400px; /* Set a max-width for the chart container */
+        }
+
+        .meal-recommendations {
+            margin: 2rem 0;
+        }
+
+        .meal-recommendations .meal-card {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🍎 Advanced Meal Tracking</h1>
+        <div class="header-buttons">
+            <a href="dashboard.html" class="header-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+                    <path d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+                </svg>
+                Dashboard
+            </a>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <nav class="sidebar">
+            <ul>
+                <li><a href="meal-logger.html" class="nav-link active">🍎 Log Meal</a></li>
+                <li><a href="#" class="nav-link">📅 Meal Planner</a></li>
+                <li><a href="#" class="nav-link">📊 Nutrition Analysis</a></li>
+                <li><a href="#" class="nav-link">💧 Hydration Track</a></li>
+                
+            </ul>
+        </nav>
+
+        <main class="main-content">
+            <div class="meal-form">
+                <h2>Log New Meal</h2>
+                <div class="form-group">
+                    <label for="foodName">Food Name</label>
+                    <input type="text" id="foodName" placeholder="Enter food name">
+                </div>
+                <div class="form-group">
+                    <label for="calories">Calories</label>
+                    <input type="number" id="calories" placeholder="Enter calories">
+                </div>
+                <div class="form-group">
+                    <label for="mealType">Meal Type</label>
+                    <select id="mealType">
+                        <option value="breakfast">Breakfast</option>
+                        <option value="lunch">Lunch</option>
+                        <option value="dinner">Dinner</option>
+                        <option value="snack">Snack</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="portionSize">Portion Size</label>
+                    <select id="portionSize">
+                        <option value="small">Small</option>
+                        <option value="medium">Medium</option>
+                        <option value="large">Large</option>
+                    </select>
+                </div>
+                <button class="animated-button interactive-element" onclick="logMeal()">📥 Save Meal</button>
+            </div>
+
+            <div class="nutrition-facts">
+                <h3>Meal Composition</h3>
+                <div class="macro-bars">
+                    <div class="macro-bar" id="protein-bar" style="width: 30%; background: var(--primary-color);"></div>
+                    <div class="macro-bar" id="carbs-bar" style="width: 50%; background: var(--secondary-color);"></div>
+                    <div class="macro-bar" id="fat-bar" style="width: 20%; background: var(--accent-color);"></div>
+                </div>
+                <div class="calorie-goal">
+                    <h4>Daily Goal Progress</h4>
+                    <svg class="progress-ring" id="calorieProgress">
+                        <circle class="progress-ring__background" stroke="#eee" stroke-width="8" fill="transparent" r="40" cx="50" cy="50"/>
+                        <circle class="progress-ring__circle" stroke="var(--primary-color)" stroke-width="8" fill="transparent" r="40" cx="50" cy="50"/>
+                    </svg>
+                    <p><span id="consumed-calories">0</span> / <span id="target-calories">2000</span> kcal</p>
+                </div>
+            </div>
+
+            <div class="nutrition-chart">
+                <h2>Daily Nutrition Breakdown</h2>
+                <canvas id="nutritionChart"></canvas>
+            </div>
+
+            <div class="meal-history">
+                <h2>Meal Timeline</h2>
+                <div id="mealTimeline" class="meal-timeline"></div>
+            </div>
+
+            <div class="meal-recommendations">
+                <h2>Meal Recommendations</h2>
+                <div id="recommendationList"></div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Meal Data Storage
+        let meals = [];
+        let totalCalories = 0;
+
+        // Log Meal Function
+        function logMeal() {
+            const foodName = document.getElementById('foodName').value;
+            const calories = parseInt(document.getElementById('calories').value);
+            const mealType = document.getElementById('mealType').value;
+            const portionSize = document.getElementById('portionSize').value;
+
+            if (!foodName || !calories) {
+                alert("Please fill in all fields.");
+                return;
+            }
+
+            const meal = {
+                id: Date.now(),
+                foodName,
+                calories,
+                mealType,
+                portionSize,
+                date: new Date().toLocaleString()
+            };
+
+            meals.push(meal);
+            totalCalories += calories;
+
+            updateMealTimeline();
+            updateCalorieProgress();
+            clearForm();
+        }
+
+        // Update Meal Timeline
+        function updateMealTimeline() {
+            const mealTimeline = document.getElementById('mealTimeline');
+            mealTimeline.innerHTML = meals.map(meal => `
+                <div class="meal-card">
+                    <h3>${meal.foodName}</h3>
+                    <p>${meal.calories} kcal | ${meal.mealType} (${meal.portionSize})</p>
+                    <p><small>${meal.date}</small></p>
+                    <button class="delete-btn" onclick="deleteMeal(${meal.id})">🗑️ Delete</button>
+                </div>
+            `).join('');
+        }
+
+        // Delete Meal
+        function deleteMeal(id) {
+            const mealIndex = meals.findIndex(meal => meal.id === id);
+            if (mealIndex !== -1) {
+                totalCalories -= meals[mealIndex].calories;
+                meals.splice(mealIndex, 1);
+                updateMealTimeline();
+                updateCalorieProgress();
+            }
+        }
+
+        // Update Calorie Progress
+        function updateCalorieProgress() {
+            const targetCalories = 2000;
+            const progress = (totalCalories / targetCalories) * 100;
+
+            const circle = document.querySelector('.progress-ring__circle');
+            const radius = circle.r.baseVal.value;
+            const circumference = 2 * Math.PI * radius;
+
+            circle.style.strokeDasharray = `${circumference} ${circumference}`;
+            circle.style.strokeDashoffset = circumference - (progress / 100) * circumference;
+
+            document.getElementById('consumed-calories').textContent = totalCalories;
+        }
+
+        // Clear Form After Submission
+        function clearForm() {
+            document.getElementById('foodName').value = '';
+            document.getElementById('calories').value = '';
+            document.getElementById('mealType').value = 'breakfast';
+            document.getElementById('portionSize').value = 'medium';
+        }
+
+        // Initialize Chart.js for Nutrition Breakdown
+        const ctx = document.getElementById('nutritionChart').getContext('2d');
+        const nutritionChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Protein', 'Carbs', 'Fat'],
+                datasets: [{
+                    data: [30, 50, 20],
+                    backgroundColor: [
+                        'var(--primary-color)',
+                        'var(--secondary-color)',
+                        'var(--accent-color)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

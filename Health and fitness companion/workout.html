@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout Tracking - HFC</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Enhanced CSS with your color scheme */
+        :root {
+            --primary-color: #4a90e2; /* Soft blue */
+            --secondary-color: #50e3c2; /* Teal */
+            --accent-color: #ff6b6b; /* Coral */
+            --background-light: #f8f9fa; /* Light gray */
+            --card-bg: #ffffff; /* White */
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --text-dark: #333333; /* Added for text color */
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            background: var(--background-light);
+            color: var(--text-dark);
+        }
+
+        header {
+            background: var(--primary-color);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .header-btn {
+            color: white;
+            text-decoration: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: calc(100vh - 80px);
+        }
+
+        .sidebar {
+            width: 260px;
+            background: var(--primary-color);
+            padding: 1.5rem;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            padding: 0.8rem 1rem;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            background: var(--card-bg);
+            margin: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .workout-form {
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 8px rgba(74, 144, 226, 0.2);
+        }
+
+        .animated-button {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .animated-button:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(80, 227, 194, 0.3);
+        }
+
+        .progress-container {
+            margin-bottom: 2rem;
+        }
+
+        .workout-history {
+            margin-top: 2rem;
+        }
+
+        .history-item {
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .history-item h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+        }
+
+        .history-item p {
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+        }
+
+        .delete-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background-color: #e53e3e;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 1rem;
+            }
+
+            .main-content {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🏋️ Workout Tracking</h1>
+        <div class="header-buttons">
+            <a href="dashboard.html" class="header-btn">⬅️ Dashboard</a>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <nav class="sidebar">
+            <ul>
+                <li><a href="workout.html" class="nav-link">🏋️ Log Workout</a></li>
+                <li><a href="#" class="nav-link">📊 Progress Analytics</a></li>
+                <li><a href="#" class="nav-link">🏅 Achievements</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+            <div class="workout-form">
+                <h2>Log New Workout</h2>
+                <form id="workoutForm">
+                    <div class="form-group">
+                        <label>Workout Type</label>
+                        <select class="form-input" id="workoutType" required>
+                            <option value="cardio">🏃‍♂️ Cardio</option>
+                            <option value="strength">💪 Strength Training</option>
+                            <option value="flexibility">🧘 Flexibility</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Duration (minutes)</label>
+                        <input type="number" class="form-input" id="duration" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Calories Burned</label>
+                        <input type="number" class="form-input" id="calories" required>
+                    </div>
+
+                    <button type="submit" class="animated-button">💾 Save Workout</button>
+                </form>
+            </div>
+
+            <div class="progress-container">
+                <h2>Weekly Progress</h2>
+                <canvas id="progressChart"></canvas>
+            </div>
+
+            <div class="workout-history">
+                <h2>Workout History</h2>
+                <div id="historyList"></div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Added line: Get the primary color from CSS variable
+        const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim();
+
+        // Initialize Chart
+        const ctx = document.getElementById('progressChart').getContext('2d');
+        const progressChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    label: 'Weekly Activity (minutes)',
+                    data: [0, 0, 0, 0, 0, 0, 0],
+                    borderColor: primaryColor,
+                    tension: 0.4,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                }
+            }
+        });
+
+        // Form Submission
+        document.getElementById('workoutForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userId = localStorage.getItem('email');
+            if (!userId) {
+                alert('Please login first!');
+                window.location.href = '/login';
+                return;
+            }
+
+            const workoutData = {
+                userId,
+                type: document.getElementById('workoutType').value,
+                duration: parseInt(document.getElementById('duration').value),
+                calories: parseInt(document.getElementById('calories').value),
+                date: new Date().toISOString()
+            };
+
+            try {
+                const response = await fetch('https://copy-of-bmi50101.onrender.com/api/workouts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(workoutData)
+                });
+
+                if (!response.ok) throw new Error('Failed to save workout');
+                
+                alert('Workout saved successfully!');
+                loadWorkoutHistory();
+                updateProgressChart();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error saving workout');
+            }
+        });
+
+        // Load Workout History
+        async function loadWorkoutHistory() {
+            const userId = localStorage.getItem('email');
+            if (!userId) return;
+
+            try {
+                const response = await fetch(`https://copy-of-bmi50101.onrender.com/api/workouts?userId=${userId}`);
+                const workouts = await response.json();
+                
+                const historyList = document.getElementById('historyList');
+                historyList.innerHTML = workouts.map(workout => `
+                    <div class="history-item">
+                        <h3>${new Date(workout.date).toLocaleDateString()}</h3>
+                        <p>Type: ${workout.type}</p>
+                        <p>Duration: ${workout.duration} mins</p>
+                        <p>Calories: ${workout.calories}</p>
+                        <button class="delete-btn" onclick="deleteWorkout('${workout._id}')">Delete</button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading history:', error);
+            }
+        }
+
+        // Delete Workout
+        async function deleteWorkout(id) {
+            try {
+                const response = await fetch(`https://copy-of-bmi50101.onrender.com/api/workouts/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) throw new Error('Failed to delete workout');
+                
+                alert('Workout deleted successfully!');
+                loadWorkoutHistory(); // Refresh the list
+                updateProgressChart(); // Update the chart
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error deleting workout');
+            }
+        }
+
+        // Update Progress Chart
+        async function updateProgressChart() {
+            const userId = localStorage.getItem('email');
+            if (!userId) return;
+
+            try {
+                const response = await fetch(`https://copy-of-bmi50101.onrender.com/api/workouts/weekly?userId=${userId}`);
+                const weeklyData = await response.json();
+                
+                progressChart.data.datasets[0].data = weeklyData;
+                progressChart.update();
+            } catch (error) {
+                console.error('Error updating chart:', error);
+            }
+        }
+
+        // Initial Load
+        loadWorkoutHistory();
+        updateProgressChart();
+    </script>
+</body>
+</html>

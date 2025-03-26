@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #ff6b6b;
+            --text: #2d3748;
+            --light: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 450px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .step {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideIn 0.5s ease forwards;
+        }
+
+        @keyframes slideIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step.active { display: block; }
+
+        h2 {
+            color: var(--text);
+            margin-bottom: 2rem;
+            font-size: 1.8rem;
+            text-align: center;
+            position: relative;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        .input-group {
+            position: relative;
+            margin: 1.5rem 0;
+        }
+
+        input {
+            width: 90%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(102,126,234,0.2);
+            outline: none;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 1.2rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102,126,234,0.3);
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .success {
+            text-align: center;
+            padding: 2rem 0;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            animation: bounce 1s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .login-button {
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+            color: white;
+            border-radius: 25px;
+            text-decoration: none;
+            margin-top: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,107,107,0.3);
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .step-dot {
+            width: 10px;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .step-dot.active {
+            background: var(--primary);
+            transform: scale(1.3);
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1.5rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="progress-steps">
+            <div class="step-dot" id="step1"></div>
+            <div class="step-dot" id="step2"></div>
+            <div class="step-dot" id="step3"></div>
+        </div>
+
+        <div id="emailStep" class="step active">
+            <h2>Get Started</h2>
+            <div class="input-group">
+                <i class="fas fa-envelope input-icon"></i>
+                <input type="email" id="email" placeholder="Enter your email">
+            </div>
+            <button onclick="sendOTP()" id="sendOtpBtn">
+                Send OTP <div class="spinner"></div>
+            </button>
+        </div>
+
+        <div id="otpStep" class="step">
+            <h2>Verify OTP</h2>
+            <div class="input-group">
+                <i class="fas fa-lock input-icon"></i>
+                <input type="text" id="otp" placeholder="Enter verification code">
+            </div>
+            <button onclick="verifyOTP()" id="verifyOtpBtn">
+                Verify <div class="spinner"></div>
+            </button>
+        </div>
+
+        <div id="passwordStep" class="step">
+            <h2>Set Password</h2>
+            <div class="input-group">
+                <i class="fas fa-key input-icon"></i>
+                <input type="password" id="password" placeholder="Create new password">
+            </div>
+            <button onclick="setPassword()" id="setPasswordBtn">
+                Complete Registration <div class="spinner"></div>
+            </button>
+        </div>
+
+        <div id="successStep" class="step success">
+            <i class="fas fa-check-circle success-icon"></i>
+            <h2>Registration Complete!</h2>
+            <p>You're all set to start your fitness journey!</p>
+            <a href="login.html" class="login-button">Continue to Login</a>
+        </div>
+    </div>
+
+    <script>
+        // Keep existing JavaScript functionality
+        // Add progress step updates
+        function updateProgress(step) {
+            document.querySelectorAll('.step-dot').forEach((dot, index) => {
+                dot.classList.toggle('active', index < step);
+            });
+        }
+
+        // Modify setActiveStep to update progress
+        function setActiveStep(stepId) {
+            document.getElementById(activeStep).classList.remove('active');
+            document.getElementById(stepId).classList.add('active');
+            activeStep = stepId;
+            
+            const stepNumber = ['emailStep', 'otpStep', 'passwordStep'].indexOf(stepId) + 1;
+            updateProgress(stepNumber);
+        }
+
+        // Rest of your original JavaScript remains unchanged
+    
+            let activeStep = 'emailStep';
+    
+            function setActiveStep(stepId) {
+                document.getElementById(activeStep).classList.remove('active');
+                document.getElementById(stepId).classList.add('active');
+                activeStep = stepId;
+            }
+    
+            function displaySpinner(btnId, show) {
+                document.getElementById(btnId).querySelector('.spinner').style.display = show ? 'block' : 'none';
+            }
+    
+            async function sendOTP() {
+                const email = document.getElementById('email').value;
+                const btn = document.getElementById('sendOtpBtn');
+                btn.disabled = true;
+                displaySpinner('sendOtpBtn', true);
+    
+                fetch("https://copy-of-bmi50101.onrender.com/send-otp", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    btn.disabled = false;
+                    displaySpinner('sendOtpBtn', false);
+    
+                    if (data.success) {
+                        localStorage.setItem("email", email);
+                        setActiveStep('otpStep');
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    btn.disabled = false;
+                    displaySpinner('sendOtpBtn', false);
+                    alert("Error sending OTP. Please try again later.");
+                });
+            }
+    
+            async function verifyOTP() {
+                const email = localStorage.getItem("email");
+                const otp = document.getElementById("otp").value;
+                const btn = document.getElementById('verifyOtpBtn');
+                btn.disabled = true;
+                displaySpinner('verifyOtpBtn', true);
+    
+                fetch("https://copy-of-bmi50101.onrender.com/verify-otp", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, otp })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    btn.disabled = false;
+                    displaySpinner('verifyOtpBtn', false);
+    
+                    if (data.success) {
+                        setActiveStep('passwordStep');
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    btn.disabled = false;
+                    displaySpinner('verifyOtpBtn', false);
+                    alert("Failed to verify OTP. Please try again.");
+                });
+            }
+    
+            async function setPassword() {
+                const email = localStorage.getItem("email");
+                const password = document.getElementById("password").value;
+                const btn = document.getElementById('setPasswordBtn');
+                btn.disabled = true;
+                displaySpinner('setPasswordBtn', true);
+    
+                fetch("https://copy-of-bmi50101.onrender.com/set-password", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, password })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    btn.disabled = false;
+                    displaySpinner('setPasswordBtn', false);
+    
+                    if (data.success) {
+                        setActiveStep('successStep');
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    btn.disabled = false;
+                    displaySpinner('setPasswordBtn', false);
+                    alert("Password setup failed. Please try again.");
+                });
+            }
+        
+    </script>
+</body>
+</html>

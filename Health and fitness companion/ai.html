@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Health Companion</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --secondary: #2e7d32;
+            --accent: #d32f2f;
+            --bg-light: #f8f9fa;
+            --text-dark: #2d3748;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, var(--bg-light) 0%, #e3f2fd 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .chat-box {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+
+        .chat-history {
+            min-height: 400px;
+            max-height: 60vh;
+            overflow-y: auto;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border-radius: 12px;
+            background: var(--bg-light);
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .message {
+            margin: 1rem 0;
+            padding: 1.2rem;
+            border-radius: 15px;
+            max-width: 80%;
+            font-size: 15px;
+            display: inline-block;
+            white-space: pre-wrap;
+            box-shadow: 3px 3px 12px rgba(0,0,0,0.05);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .section-container {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .recommendation-btn {
+            background: linear-gradient(135deg, var(--primary), #357abd);
+            color: white;
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .diet-options {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .recommendation-list {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .recommendation-item {
+            padding: 1.2rem;
+            border-radius: 12px;
+            border-left: 4px solid;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .diet-item { background: #e8f5e9; border-color: var(--secondary); }
+        .workout-item { background: #e3f2fd; border-color: var(--primary); }
+        .goal-item { background: #fff3e0; border-color: #ef6c00; }
+        .health-item { background: #ffebee; border-color: var(--accent); }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="chat-box">
+            <div class="chat-history" id="chatHistory">
+                <div class="message ai-message">
+                    🎉 Welcome to your AI Health Companion!<br>
+                    Let's create a personalized health plan together.
+                </div>
+            </div>
+            <button class="recommendation-btn" onclick="getRecommendations()" data-original-text="<i class='fas fa-magic'></i> Generate Smart Plan">
+                <i class="fas fa-magic"></i> Generate Smart Plan
+            </button>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+
+        <!-- Dietary Recommendations Section -->
+        <div class="section-container">
+            <h2><i class="fas fa-utensils"></i> Dietary Recommendations</h2>
+            <div class="diet-options">
+                <label>
+                    <input type="radio" name="diet" value="vegetarian" checked>
+                    <i class="fas fa-leaf"></i> Vegetarian
+                </label>
+                <label>
+                    <input type="radio" name="diet" value="non-vegetarian">
+                    <i class="fas fa-drumstick-bite"></i> Non-Vegetarian
+                </label>
+            </div>
+            <button class="recommendation-btn" onclick="generateFoodRecommendations()" 
+                    data-original-text="<i class='fas fa-carrot'></i> Generate Meal Plan">
+                <i class="fas fa-carrot"></i> Generate Meal Plan
+            </button>
+            <div id="foodRecommendations" class="recommendation-list"></div>
+        </div>
+
+        <!-- Workout Plan Section -->
+        <div class="section-container">
+            <h2><i class="fas fa-running"></i> Workout Plan</h2>
+            <button class="recommendation-btn" onclick="generateWorkoutRecommendations()" 
+                    data-original-text="<i class='fas fa-dumbbell'></i> Generate Workout Plan">
+                <i class="fas fa-dumbbell"></i> Generate Workout Plan
+            </button>
+            <div id="workoutRecommendations" class="recommendation-list"></div>
+        </div>
+
+        <!-- Goal Management Section -->
+        <div class="section-container">
+            <h2><i class="fas fa-bullseye"></i> Goal Management</h2>
+            <button class="recommendation-btn" onclick="generateGoals()" 
+                    data-original-text="<i class='fas fa-plus'></i> Generate Goals">
+                <i class="fas fa-plus"></i> Generate Goals
+            </button>
+            <div id="goalsList" class="recommendation-list"></div>
+        </div>
+
+        <!-- Health Status Section -->
+        <div class="section-container">
+            <h2><i class="fas fa-heartbeat"></i> Health Status</h2>
+            <button class="recommendation-btn" onclick="generateHealthStatus()" 
+                    data-original-text="<i class='fas fa-share'></i> Generate & Share Status">
+                <i class="fas fa-share"></i> Generate & Share Status
+            </button>
+            <div id="healthStatus" class="health-item recommendation-item" style="display: none;"></div>
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <button class="recommendation-btn back-btn" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i> Return to Dashboard
+            </button>
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <script>
+        // Common Functions
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        function showError(error) {
+            console.error(error);
+            const errorElement = document.getElementById("errorMessage");
+            errorElement.textContent = error.message;
+            errorElement.style.display = 'block';
+            setTimeout(() => errorElement.style.display = 'none', 5000);
+        }
+
+        async function fetchMetrics() {
+            try {
+                const userId = localStorage.getItem("email");
+                const response = await fetch(`https://copy-of-bmi50101.onrender.com/get-metrics?userId=${userId}`);
+                return await response.json();
+            } catch (error) {
+                showError(error);
+            }
+        }
+
+        // Main Recommendations
+        async function getRecommendations() {
+            const btn = event.target;
+            try {
+                showLoading();
+                btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Generating...`;
+                
+                const metrics = await fetchMetrics();
+                const { bmi } = metrics[0];
+                const prompt = `Create a comprehensive health plan for BMI ${bmi}. 
+                    Include diet suggestions, workout routines, and health recommendations. 
+                    Format with clear sections and emojis.`;
+                
+                const response = await getAIResponse(prompt);
+                displayChatResponse(response.reply);
+            } catch (error) {
+                showError(error);
+            } finally {
+                hideLoading();
+                btn.innerHTML = btn.getAttribute('data-original-text');
+            }
+        }
+
+        // Food Recommendations
+        async function generateFoodRecommendations() {
+            const btn = event.target;
+            try {
+                showLoading();
+                btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Cooking...`;
+                
+                const dietType = document.querySelector('input[name="diet"]:checked').value;
+                const metrics = await fetchMetrics();
+                const { bmi } = metrics[0];
+                
+                const prompt = `List 7 ${dietType} foods for BMI ${bmi} as numbered items. 
+                    Format: "1. [Emoji] Food Name - Brief benefit description"`;
+                
+                const response = await getAIResponse(prompt);
+                displayRecommendations(response.reply, 'foodRecommendations', 'diet-item');
+            } catch (error) {
+                showError(error);
+            } finally {
+                hideLoading();
+                btn.innerHTML = btn.getAttribute('data-original-text');
+            }
+        }
+
+        // Workout Recommendations
+        async function generateWorkoutRecommendations() {
+            const btn = event.target;
+            try {
+                showLoading();
+                btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Planning...`;
+                
+                const metrics = await fetchMetrics();
+                const { bmi } = metrics[0];
+                const prompt = `Suggest 5 workouts for BMI ${bmi} with durations. 
+                    Format: "1. [Emoji] Exercise (Duration) - Benefit"`;
+                
+                const response = await getAIResponse(prompt);
+                displayRecommendations(response.reply, 'workoutRecommendations', 'workout-item');
+            } catch (error) {
+                showError(error);
+            } finally {
+                hideLoading();
+                btn.innerHTML = btn.getAttribute('data-original-text');
+            }
+        }
+
+        // Goal Management
+        async function generateGoals() {
+            const btn = event.target;
+            try {
+                showLoading();
+                btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Creating...`;
+                
+                const metrics = await fetchMetrics();
+                const { bmi } = metrics[0];
+                const prompt = `Create 3 SMART goals for BMI ${bmi}. 
+                    Format: "1. [Emoji] Goal Description"`;
+                
+                const response = await getAIResponse(prompt);
+                displayGoals(response.reply);
+            } catch (error) {
+                showError(error);
+            } finally {
+                hideLoading();
+                btn.innerHTML = btn.getAttribute('data-original-text');
+            }
+        }
+
+        // Health Status
+        async function generateHealthStatus() {
+            const btn = event.target;
+            try {
+                showLoading();
+                btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Analyzing...`;
+                
+                const metrics = await fetchMetrics();
+                const { bmi } = metrics[0];
+                const prompt = `Create a friendly health summary for BMI ${bmi} with emojis. 
+                    Max 2 sentences for easy sharing.`;
+                
+                const response = await getAIResponse(prompt);
+                const statusCard = document.getElementById("healthStatus");
+                statusCard.innerHTML = response.reply;
+                statusCard.style.display = 'block';
+            } catch (error) {
+                showError(error);
+            } finally {
+                hideLoading();
+                btn.innerHTML = btn.getAttribute('data-original-text');
+            }
+        }
+
+        // Display Functions
+        function displayRecommendations(text, containerId, styleClass) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            text.split('\n').forEach(line => {
+                const div = document.createElement('div');
+                div.className = `recommendation-item ${styleClass}`;
+                div.innerHTML = line.replace(/-/g, '<br><span style="color: #666;">- ');
+                container.appendChild(div);
+            });
+        }
+
+        function displayGoals(text) {
+            const container = document.getElementById("goalsList");
+            container.innerHTML = '';
+            
+            text.split('\n').forEach(line => {
+                const div = document.createElement('div');
+                div.className = 'recommendation-item goal-item';
+                div.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <button class="add-goal-btn" onclick="addGoal('${line.replace(/^\d+\.\s*/, '')}')">
+                            +
+                        </button>
+                        ${line}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // Backend Communication
+        async function getAIResponse(prompt) {
+            const response = await fetch("https://copy-of-bmi50101.onrender.com/get-ai-recommendation", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt })
+            });
+            if (!response.ok) throw new Error('AI service error');
+            return response.json();
+        }
+
+        async function addGoal(goalText) {
+            try {
+                const userId = localStorage.getItem("email");
+                const response = await fetch('https://copy-of-bmi50101.onrender.com/add-goal', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId,
+                        title: goalText.split('-')[0].trim(),
+                        description: goalText,
+                        category: "Health Improvement",
+                        priority: "Medium",
+                        targetDate: new Date(Date.now() + 12096e5).toISOString()
+                    })
+                });
+
+                if (!response.ok) throw new Error('Failed to add goal');
+                alert(`Goal added successfully!`);
+            } catch (error) {
+                showError(error);
+            }
+        }
+
+        function goBack() {
+            window.location.href = "dashboard.html";
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Recommendations</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h2>Personalized Fitness Plans</h2>
+        <a href="dashboard.html" class="back-btn">Back</a>
+    </header>
+
+    <div class="container">
+        <button onclick="generateRecommendation()">Get Recommendation</button>
+        <p id="recommendation"></p>
+    </div>
+
+    <script>
+        function generateRecommendation() {
+            let recommendations = [
+                "🏃‍♂️ Try a 5km run challenge!",
+                "💪 Focus on strength training this week.",
+                "🥗 Add more protein to your diet.",
+                "🏋️‍♀️ Do a full-body workout 3 times this week."
+            ];
+            let random = Math.floor(Math.random() * recommendations.length);
+            document.getElementById("recommendation").innerText = recommendations[random];
+        }
+    </script>
+</body>
+</html>

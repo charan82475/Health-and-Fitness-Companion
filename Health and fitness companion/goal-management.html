@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goal Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --secondary: #333;
+            --bg-light: #f8f9fa;
+            --bg-dark: #1a1a1a;
+            --text-light: #fff;
+            --text-dark: #333;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .dark-mode {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), #764ba2);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .back-btn {
+            color: white;
+            background: transparent;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: background 0.3s ease;
+        }
+
+        .goal-form {
+            margin-bottom: 2rem;
+        }
+
+        .goal-form input,
+        .goal-form textarea,
+        .goal-form select {
+            width: 100%;
+            padding: 0.8rem;
+            margin: 0.5rem 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .goal-form button.toggle {
+            padding: 0.5rem 1rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-dark);
+        }
+
+        .goal-inputs {
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .add-goal-btn {
+            padding: 1rem 2rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s ease;
+        }
+
+        .add-goal-btn:hover {
+            background: #4a8ee2;
+        }
+
+        .goal-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .goal-card {
+            background: #fff;
+            margin: 1rem 0;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .goal-content {
+            flex: 1;
+            margin-right: 1rem;
+        }
+
+        .goal-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .goal-title {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .goal-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .category {
+            padding: 0.3rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .priority {
+            padding: 0.3rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .progress-bar {
+            width: 150px;
+            height: 15px;
+            background: #eee;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+        }
+
+        .progress-btn {
+            padding: 0.2rem 0.5rem;
+            border: none;
+            background: #eee;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .progress-btn:hover {
+            background: #ddd;
+        }
+
+        .edit-btn,
+        .delete-btn {
+            padding: 0.5rem;
+            border: none;
+            cursor: pointer;
+            background: none;
+        }
+
+        .edit-btn {
+            color: #4a90e2;
+        }
+
+        .delete-btn {
+            color: #f44336;
+        }
+
+        .success-message {
+            color: #4caf50;
+            margin: 1rem 0;
+        }
+
+        .error-message {
+            color: #f44336;
+            margin: 1rem 0;
+        }
+
+        .dark-mode header {
+            background: linear-gradient(135deg, #4a90e2, #764ba2);
+        }
+
+        .dark-mode .container {
+            background: var(--bg-dark);
+            color: var(--text-light);
+        }
+
+        .dark-mode .goal-card {
+            background: var(--bg-dark);
+            color: var(--text-light);
+            box-shadow: 0 3px 10px rgba(255,255,255,0.1);
+        }
+
+        .dark-mode .add-goal-btn {
+            background: #4a90e2;
+            color: var(--text-light);
+        }
+
+        .dark-mode .category,
+        .dark-mode .priority {
+            background: #4a90e2;
+            color: var(--text-light);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .goal-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .goal-actions {
+                display: flex;
+                flex-direction: row;
+                gap: 1rem;
+                margin-top: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h2 class="logo">Goal Management</h2>
+        <button class="back-btn">Back</button>
+    </header>
+
+    <div class="container">
+        <div class="goal-form">
+            <input type="text" id="goalTitle" placeholder="Enter your goal">
+            <button class="toggle" onclick="toggleGoalForm()">Show More</button>
+
+            <div class="goal-inputs" id="goalInputs">
+                <textarea id="goalDescription" placeholder="Goal description (optional)"></textarea>
+                <input type="date" id="goalTargetDate" placeholder="Target Date">
+                <select id="goalCategory">
+                    <option value="health">Health</option>
+                    <option value="career">Career</option>
+                    <option value="finance">Finance</option>
+                    <option value="education">Education</option>
+                    <option value="personal">Personal</option>
+                </select>
+                <select id="goalPriority">
+                    <option value="high">High Priority</option>
+                    <option value="medium">Medium Priority</option>
+                    <option value="low">Low Priority</option>
+                </select>
+            </div>
+        </div>
+
+        <button class="add-goal-btn" onclick="addGoal()">Add Goal</button>
+
+        <h3>Your Goals</h3>
+        <ul class="goal-list" id="goalList"></ul>
+
+        <div class="success-message" id="successMessage"></div>
+        <div class="error-message" id="errorMessage"></div>
+    </div>
+
+    <div class="mode-toggle" onclick="toggleDarkMode()">
+        <i class="fas fa-moon"></i>
+    </div>
+
+    <script>
+        let isDarkMode = false;
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            isDarkMode = !isDarkMode;
+            localStorage.setItem('darkMode', isDarkMode);
+        }
+
+        window.onload = () => {
+            const darkMode = localStorage.getItem('darkMode') === 'true';
+            if (darkMode) {
+                document.body.classList.add('dark-mode');
+                isDarkMode = true;
+            }
+
+            // Redirect to dashboard on back button click
+            document.querySelector('.back-btn').addEventListener('click', () => {
+                window.location.href = 'dashboard.html';
+            });
+        };
+
+        function toggleGoalForm() {
+            const goalInputs = document.getElementById('goalInputs');
+            const toggleBtn = document.querySelector('.goal-form .toggle');
+            goalInputs.style.display = goalInputs.style.display === 'block' ? 'none' : 'block';
+            toggleBtn.textContent = goalInputs.style.display === 'block' ? 'Show Less' : 'Show More';
+        }
+
+        async function addGoal() {
+            const title = document.getElementById('goalTitle').value.trim();
+            const description = document.getElementById('goalDescription').value.trim();
+            const targetDate = document.getElementById('goalTargetDate').value;
+            const category = document.getElementById('goalCategory').value;
+            const priority = document.getElementById('goalPriority').value;
+
+            if (!title) {
+                document.getElementById('errorMessage').textContent = 'Goal title is required';
+                return;
+            }
+
+            const userId = localStorage.getItem("email");
+
+            try {
+                const response = await fetch("https://copy-of-bmi50101.onrender.com/add-goal", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ userId, title, description, targetDate, category, priority })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('successMessage').textContent = 'Goal added successfully';
+                    setTimeout(() => {
+                        document.getElementById('successMessage').textContent = '';
+                    }, 4000);
+                    displayGoals();
+                } else {
+                    document.getElementById('errorMessage').textContent = data.message || 'Error adding goal';
+                }
+            } catch (error) {
+                document.getElementById('errorMessage').textContent = 'Error adding goal';
+            }
+
+            // Reset form
+            document.getElementById('goalTitle').value = '';
+            document.getElementById('goalDescription').value = '';
+            document.getElementById('goalTargetDate').value = '';
+            document.getElementById('goalCategory').value = 'health';
+            document.getElementById('goalPriority').value = 'high';
+            document.getElementById('goalInputs').style.display = 'none';
+            document.querySelector('.goal-form .toggle').textContent = 'Show More';
+        }
+
+        async function displayGoals() {
+            const userId = localStorage.getItem("email");
+            const goalList = document.getElementById('goalList');
+            goalList.innerHTML = '';
+
+            try {
+                const response = await fetch(`https://copy-of-bmi50101.onrender.com/get-goals?userId=${userId}`);
+                const data = await response.json();
+
+                data.forEach(goal => {
+                    const formattedDate = goal.targetDate ? new Date(goal.targetDate).toLocaleDateString() : 'No date set';
+                    const categoryColor = getCategoryColor(goal.category);
+                    const priorityColor = getPriorityColor(goal.priority);
+                    const progressStyle = `width: ${goal.progress}%`;
+
+                    const goalHtml = `
+                        <li class="goal-card">
+                            <div class="goal-content">
+                                <h4 class="goal-title">${goal.title}</h4>
+                                <div class="goal-status">
+                                    <span class="category" style="background-color: ${categoryColor}">${goal.category}</span>
+                                    <span class="priority" style="background-color: ${priorityColor}">${goal.priority}</span>
+                                </div>
+                                ${goal.description ? `<p class="description">${goal.description}</p>` : ''}
+                                ${goal.targetDate ? `<p class="target-date">Target Date: ${formattedDate}</p>` : ''}
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="${progressStyle}"></div>
+                                </div>
+                                <div class="progress-buttons">
+                                    <button class="progress-btn" onclick="increaseProgress('${goal._id}', 10)">+</button>
+                                    <button class="progress-btn" onclick="decreaseProgress('${goal._id}', 10)">-</button>
+                                    <span class="progress-text">${goal.progress}%</span>
+                                </div>
+                            </div>
+                            <div class="goal-actions">
+                                <button class="edit-btn" onclick="editGoal('${goal._id}')"><i class="fas fa-edit"></i></button>
+                                <button class="delete-btn" onclick="deleteGoal('${goal._id}')"><i class="fas fa-trash-alt"></i></button>
+                            </div>
+                        </li>
+                    `;
+
+                    goalList.innerHTML += goalHtml;
+                });
+            } catch (error) {
+                document.getElementById('errorMessage').textContent = 'Error fetching goals';
+            }
+        }
+
+        function getCategoryColor(category) {
+            const colors = {
+                health: '#4CAF50',
+                career: '#FF9800',
+                finance: '#2196F3',
+                education: '#9C27B0',
+                personal: '#795548'
+            };
+            return colors[category] || '#607D8B';
+        }
+
+        function getPriorityColor(priority) {
+            const colors = {
+                high: '#f44336',
+                medium: '#ff9800',
+                low: '#4CAF50'
+            };
+            return colors[priority] || '#2196F3';
+        }
+
+        async function increaseProgress(id, amount) {
+            try {
+                const response = await fetch(`https://copy-of-bmi50101.onrender.com/update-goal/${id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ progressAmount: amount })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayGoals();
+                } else {
+                    document.getElementById('errorMessage').textContent = 'Error updating progress';
+                }
+            } catch (error) {
+                document.getElementById('errorMessage').textContent = 'Error updating progress';
+            }
+        }
+
+        async function decreaseProgress(id, amount) {
+            try {
+                const response = await fetch(`https://copy-of-bmi50101.onrender.com/update-goal/${id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ progressAmount: -amount })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayGoals();
+                } else {
+                    document.getElementById('errorMessage').textContent = 'Error updating progress';
+                }
+            } catch (error) {
+                document.getElementById('errorMessage').textContent = 'Error updating progress';
+            }
+        }
+
+        function editGoal(id) {
+            console.log('Edit functionality not implemented yet');
+        }
+
+        async function deleteGoal(id) {
+            try {
+                const response = await fetch(`https://copy-of-bmi50101.onrender.com/delete-goal/${id}`, { method: "DELETE" });
+                if (response.ok) {
+                    document.getElementById('successMessage').textContent = 'Goal deleted successfully';
+                    setTimeout(() => {
+                        document.getElementById('successMessage').textContent = '';
+                    }, 4000);
+                    displayGoals();
+                } else {
+                    document.getElementById('errorMessage').textContent = 'Failed to delete goal';
+                }
+            } catch (error) {
+                document.getElementById('errorMessage').textContent = 'Error deleting goal';
+            }
+        }async function increaseProgress(id, amount) {
+            try {
+                const response = await fetch(`https://copy-of-bmi50101.onrender.com/update-goal/${id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ progressAmount: amount })
+                });
+        
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayGoals();
+                    document.getElementById('successMessage').textContent = 'Progress updated successfully';
+                    setTimeout(() => {
+                        document.getElementById('successMessage').textContent = '';
+                    }, 4000);
+                } else {
+                    document.getElementById('errorMessage').textContent = data.message;
+                }
+            } catch (error) {
+                document.getElementById('errorMessage').textContent = 'Error updating progress';
+            }
+        }
+        async function increaseProgress(id, amount) {
+    try {
+        const response = await fetch(`https://copy-of-bmi50101.onrender.com/update-goal/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ progressAmount: amount })
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+            displayGoals();
+            document.getElementById('successMessage').textContent = 'Progress updated successfully';
+            setTimeout(() => {
+                document.getElementById('successMessage').textContent = '';
+            }, 4000);
+        } else {
+            document.getElementById('errorMessage').textContent = data.message;
+        }
+    } catch (error) {
+        document.getElementById('errorMessage').textContent = 'Error updating progress';
+    }
+}
+
+        displayGoals();
+    </script>
+</body>
+</html>

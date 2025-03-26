@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health & Fitness Companion</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2c80ff;
+            --primary-text: #ffffff;
+            --secondary: #ff6b6b;
+            --text: #333333;
+            --bg-light: #f8f9fa;
+            --bg-dark: #121212;
+            --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            background: var(--bg-light);
+            color: var(--text);
+        }
+
+        .dark-mode {
+            background: var(--bg-dark);
+            color: var(--primary-text);
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 1.5rem 5%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            color: var(--primary-text);
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            animation: textGlow 2s infinite alternate;
+        }
+
+        @keyframes textGlow {
+            from { text-shadow: 0 0 10px rgba(44,128,255,0.3); }
+            to { text-shadow: 0 0 20px rgba(44,128,255,0.6); }
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-btn {
+            padding: 1rem 2rem;
+            border-radius: 30px;
+            color: var(--primary-text);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            background: var(--primary);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .nav-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300%;
+            height: 300%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2), transparent 70%);
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 0.5s ease;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .nav-btn:hover::after {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .hero {
+            padding: 8rem 5% 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 100vh;
+            background: var(--bg-light);
+            animation: slideInFromBottom 1s ease;
+        }
+
+        @keyframes slideInFromBottom {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-content {
+            max-width: 500px;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: textFade 2s infinite alternate;
+        }
+
+        @keyframes textFade {
+            from { opacity: 0.8; }
+            to { opacity: 1; }
+        }
+
+        .subhead {
+            font-size: 1.5rem;
+            opacity: 0.8;
+            margin-bottom: 2rem;
+        }
+
+        .cta-btn {
+            padding: 1.5rem 3rem;
+            border-radius: 30px;
+            color: var(--primary-text);
+            text-decoration: none;
+            background: var(--primary);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .hero-image {
+            max-width: 500px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .hero-image:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+
+        .features-section {
+            padding: 4rem 5%;
+            background: var(--bg-light);
+            animation: fadeIn 1s ease;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .feature-card {
+            padding: 3rem;
+            border-radius: 15px;
+            background: var(--bg-light);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            background: linear-gradient(135deg, rgba(255,255,255, 0.9), rgba(255,255,255, 0.8));
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .community-section {
+            padding: 4rem 5%;
+            background: radial-gradient(50% 50% at 50% 50%, rgba(44,128,255,0.1) 0%, rgba(255,107,107,0.1) 100%);
+            animation: fadeIn 1s ease;
+        }
+
+        .community-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .community-card {
+            padding: 2rem;
+            border-radius: 15px;
+            background: var(--bg-light);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .community-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            background: linear-gradient(135deg, rgba(255,255,255, 0.9), rgba(255,255,255, 0.8));
+        }
+
+        .health-articles {
+            padding: 4rem 5%;
+            background: var(--bg-light);
+            animation: fadeIn 1s ease;
+        }
+
+        .article-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .article-card {
+            padding: 2rem;
+            border-radius: 15px;
+            background: var(--bg-light);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .article-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            background: linear-gradient(135deg, rgba(255,255,255, 0.9), rgba(255,255,255, 0.8));
+        }
+
+        .top-bar {
+            background: var(--primary);
+            padding: 0.5rem 5%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            display: none;
+            animation: slideInFromTop 1s ease;
+        }
+
+        @keyframes slideInFromTop {
+            from { opacity: 0; transform: translateY(-100%); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        footer {
+            padding: 4rem 5%;
+            background: var(--bg-dark);
+            color: var(--primary-text);
+            animation: fadeIn 1s ease;
+        }
+
+        .mode-toggle {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--secondary);
+            color: var(--primary-text);
+            padding: 1.5rem;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .ai-chatbot-icon {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease;
+        }
+
+        .ai-chatbot-icon:hover {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+        }
+
+        .ai-chatbot-icon i {
+            color: white;
+            font-size: 24px;
+        }
+
+        .ai-chat-window {
+            position: fixed;
+            top: 100px;
+            right: -324px;
+            width: 300px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: right 0.4s ease;
+            z-index: 10000;
+        }
+
+        .ai-chat-window.open {
+            right: 30px;
+        }
+
+        .chat-header {
+            padding: 12px;
+            background: var(--primary);
+            border-radius: 16px 16px 0 0;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+
+        .chat-header h3 {
+            font-size: 16px;
+            margin: 0;
+        }
+
+        .close-chat-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .chat-body {
+            padding: 10px;
+            height: 50vh;
+            overflow-y: auto;
+            background: var(--bg-light);
+            border-bottom: 1px solid #eee;
+        }
+
+        .message-bubble {
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 16px;
+            margin: 6px;
+            display: inline-block;
+        }
+
+        .user-message {
+            background: var(--secondary);
+            color: white;
+            margin-left: auto;
+        }
+
+        .ai-message {
+            background: var(--primary);
+            color: white;
+            margin-right: auto;
+        }
+
+        .chat-input {
+            padding: 10px;
+            display: flex;
+            border-top: 1px solid #eee;
+            background: white;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 16px 0 0 16px;
+        }
+
+        .chat-input button {
+            border: none;
+            background: var(--primary);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 0 16px 16px 0;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 1rem 5%;
+            }
+
+            .logo {
+                font-size: 1.8rem;
+            }
+
+            .nav-buttons {
+                gap: 1rem;
+                margin-right: auto;
+            }
+
+            .nav-btn {
+                padding: 0.8rem 1.5rem;
+            }
+
+            .hero {
+                display: block;
+                text-align: center;
+                padding: 4rem 5%;
+            }
+
+            .hero-content {
+                max-width: none;
+            }
+
+            .hero-image {
+                max-width: 100%;
+                margin: 2rem auto;
+            }
+
+            .features-section {
+                padding: 2rem 5%;
+            }
+
+            .feature-grid,
+            .community-grid,
+            .article-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .ai-chatbot-icon {
+                right: 15px;
+                bottom: 15px;
+                width: 50px;
+                height: 50px;
+            }
+
+            .ai-chat-window {
+                width: 250px;
+                right: -254px;
+                top: 50px;
+            }
+
+            .ai-chat-window.open {
+                right: 15px;
+            }
+
+            .chat-body {
+                height: 60vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">Health & Fitness Companion</div>
+        <nav class="nav-buttons">
+            <a href="register.html" class="nav-btn">Sign Up</a>
+            <a href="login.html" class="nav-btn">Login</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Transform Your Fitness Journey</h1>
+                <p class="subhead">AI-powered health companion for personalized fitness solutions</p>
+                <a href="#" class="cta-btn">Start Your Journey</a>
+            </div>
+            <img src="hero.jpeg" alt="Fitness Hero Banner" class="hero-image">
+        </section>
+
+        <section class="features-section">
+            <h2>Advanced Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>AI-Powered Health Insights</h3>
+                    <p>Get personalized recommendations based on your health goals and progress</p>
+                </div>
+                <div class="feature-card">
+                    <h3>3D Motion Tracking</h3>
+                    <p>Analyze your form in real-time and improve workout effectiveness</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Blood Flow Analysis</h3>
+                    <p>Monitor and improve circulation with expert workout strategies</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Adaptive Training Plans</h3>
+                    <p>Automatically adjust intensity based on performance and recovery</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Nutrition Matcher</h3>
+                    <p>Find the perfect meal plans to fuel your fitness goals</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Global Community</h3>
+                    <p>Connect with like-minded individuals and share your journey</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="community-section">
+            <h2>Join Our Fitness Community</h2>
+            <div class="community-grid">
+                <div class="community-card">
+                    <h3>Success Stories</h3>
+                    <p>Hear from individuals who have transformed their lives</p>
+                </div>
+                <div class="community-card">
+                    <h3>Weekly Challenges</h3>
+                    <p>Stay motivated with fun and engaging community activities</p>
+                </div>
+                <div class="community-card">
+                    <h3>Expert Webinars</h3>
+                    <p>Learn from leading fitness professionals</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="health-articles">
+            <h2>Latest Health Articles</h2>
+            <div class="article-grid">
+                <div class="article-card">
+                    <h3>The Science of Weight Loss</h3>
+                    <p>Understanding metabolism and sustainable weight management</p>
+                </div>
+                <div class="article-card">
+                    <h3>Muscle Recovery Techniques</h3>
+                    <p>How to accelerate recovery and prevent injuries</p>
+                </div>
+                <div class="article-card">
+                    <h3>Nutrition Myths Debunked</h3>
+                    <p>Separating fact from fiction in dietary advice</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>Developed by Phanindra Reddy K,Abhishek,Charan sai,Gowtham</p>
+            <p>© 2025 Health & Fitness Companion. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <div class="ai-chatbot-icon" onclick="toggleChatWindow()">
+        <i class="fa-solid fa-robot"></i>
+    </div>
+
+    <div class="ai-chat-window" id="chatWindow">
+        <div class="chat-header">
+            <h3>Health Assistant</h3>
+            <span class="close-chat-icon" onclick="toggleChatWindow()">&#x2715;</span>
+        </div>
+        <div class="chat-body" id="chatBody">
+            <div class="message-bubble ai-message" style="animation: fade 0.3s ease-in-out;">
+                Welcome! Ask anything about health and fitness.
+            </div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="userInput" placeholder="Type a message...">
+            <button onclick="sendMessage()">&#x27a4;</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+        }
+
+        let chatWindow = document.getElementById('chatWindow');
+        let chatBody = document.getElementById('chatBody');
+        let userInput = document.getElementById('userInput');
+
+        function toggleChatWindow() {
+            chatWindow.classList.toggle('open');
+            userInput.focus();
+        }
+
+        function sendMessage() {
+            const userMsg = userInput.value.trim();
+            if (userMsg) {
+                addMessage('user-message', userMsg);
+                generateResponse(userMsg);
+                userInput.value = '';
+            }
+        }
+
+        function addMessage(className, message, delay = 0) {
+            if (delay > 0) {
+                setTimeout(() => {
+                    const messageBubble = document.createElement('div');
+                    messageBubble.className = `message-bubble ${className}`;
+                    messageBubble.textContent = message;
+                    chatBody.appendChild(messageBubble);
+                    chatBody.scrollTop = chatBody.scrollHeight;
+                }, delay);
+            } else {
+                const messageBubble = document.createElement('div');
+                messageBubble.className = `message-bubble ${className}`;
+                messageBubble.textContent = message;
+                chatBody.appendChild(messageBubble);
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }
+        }
+
+        function generateResponse(query) {
+            const responses = [
+                "Sure, I can help with that! What specific questions do you have?",
+                "Great question! Let me think about that...",
+                "To get started, could you provide more details?",
+                "I'm here to assist you. What's on your mind today?",
+                "Let's see... How can I assist you further?"
+            ];
+            addMessage('ai-message', responses[Math.floor(Math.random() * responses.length)], 500);
+        }
+
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        function displayInitialMessage() {
+            addMessage('ai-message', "Welcome to the Health & Fitness Companion! How can I help you today?", 0);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        displayInitialMessage();
+    </script>
+</body>
+</html>

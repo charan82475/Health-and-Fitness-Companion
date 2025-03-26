@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect Wearable Device | HFC</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* Custom Styles */
+        .device-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .device-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .data-badge {
+            background: linear-gradient(145deg, #f0f4ff, #ffffff);
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .modal-enter {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        .modal-enter-active {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.3s ease-out;
+        }
+        .step-transition {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .step-hidden {
+            opacity: 0;
+            transform: translateX(20px);
+            pointer-events: none;
+        }
+        .step-visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-12">
+        <div class="max-w-4xl mx-auto">
+            <!-- Back to Dashboard Button -->
+            <a href="dashboard.html" class="inline-block mb-6 text-blue-600 hover:text-blue-800 transition-colors">
+                &larr; Back to Dashboard
+            </a>
+
+            <!-- Connection Section -->
+            <div class="bg-white rounded-xl p-8 shadow-sm mb-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Connect Your Wearable Device</h2>
+                <p class="text-gray-600 mb-6">Select your device below to connect and start syncing your health data.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Fitbit Card -->
+                    <div class="device-card bg-white rounded-lg p-6 border border-gray-200">
+                        <img src="fitbit-icon.png" alt="Fitbit" class="h-16 mb-4 mx-auto">
+                        <button onclick="connectDevice('fitbit')" 
+                                class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center">
+                            <span id="fitbit-text">Connect Fitbit</span>
+                            <div id="fitbit-spinner" class="loading-spinner ml-2 hidden"></div>
+                        </button>
+                    </div>
+                    <!-- Apple Watch Card -->
+                    <div class="device-card bg-white rounded-lg p-6 border border-gray-200">
+                        <img src="apple-watch-icon.png" alt="Apple Watch" class="h-16 mb-4 mx-auto">
+                        <button onclick="connectDevice('apple')" 
+                                class="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center">
+                            <span id="apple-text">Connect Apple Watch</span>
+                            <div id="apple-spinner" class="loading-spinner ml-2 hidden"></div>
+                        </button>
+                    </div>
+                </div>
+                <!-- Success and Error Messages -->
+                <div id="success-message" class="text-green-600 mt-4 text-center hidden">Connection successful! Redirecting to dashboard...</div>
+                <div id="error-message" class="text-red-600 mt-4 text-center hidden">Connection failed. Please try again.</div>
+            </div>
+
+            <!-- Data Display Section -->
+            <div class="bg-white rounded-xl p-8 shadow-sm">
+                <h3 class="text-xl font-semibold text-gray-700 mb-6">Your Health Data</h3>
+                <div id="data-container" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <!-- Data will be populated here -->
+                    <div class="data-badge p-4 rounded-lg">
+                        <p class="text-gray-500">Steps</p>
+                        <p class="text-2xl font-bold text-blue-600">0</p>
+                    </div>
+                    <div class="data-badge p-4 rounded-lg">
+                        <p class="text-gray-500">Heart Rate</p>
+                        <p class="text-2xl font-bold text-red-600">0</p>
+                    </div>
+                    <div class="data-badge p-4 rounded-lg">
+                        <p class="text-gray-500">Calories</p>
+                        <p class="text-2xl font-bold text-green-600">0</p>
+                    </div>
+                    <div class="data-badge p-4 rounded-lg">
+                        <p class="text-gray-500">Active Minutes</p>
+                        <p class="text-2xl font-bold text-purple-600">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Connection Modal -->
+    <div id="connection-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full modal-enter">
+            <div id="step1" class="step-transition step-visible">
+                <h3 class="text-xl font-bold mb-4">Step 1: Authorize Device</h3>
+                <p class="text-gray-600 mb-6">Click below to authorize access to your wearable device data.</p>
+                <button onclick="showStep(2)" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700">
+                    Authorize with Provider
+                </button>
+            </div>
+
+            <div id="step2" class="step-transition step-hidden">
+                <h3 class="text-xl font-bold mb-4">Step 2: Enter API Key</h3>
+                <p class="text-gray-600 mb-4">Please enter your API key found in device settings:</p>
+                <input type="text" id="api-key" 
+                       class="w-full border rounded-lg p-3 mb-4" 
+                       placeholder="Enter your API key">
+                <button onclick="validateApiKey()" 
+                        class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 flex justify-center items-center">
+                    <span id="validate-text">Validate Key</span>
+                    <div id="validate-spinner" class="loading-spinner ml-2 hidden"></div>
+                </button>
+            </div>
+
+            <div id="step3" class="step-transition step-hidden">
+                <h3 class="text-xl font-bold mb-4">Step 3: Sync Data</h3>
+                <p class="text-gray-600 mb-6">Syncing your health data...</p>
+                <div class="text-center">
+                    <div class="loading-spinner mx-auto"></div>
+                </div>
+            </div>
+
+            <div id="step-error" class="text-red-600 mt-4 text-center hidden"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentDevice = null;
+        let apiKeys = {
+            fitbit: null,
+            apple: null
+        };
+
+        function connectDevice(deviceType) {
+            currentDevice = deviceType;
+            const modal = document.getElementById('connection-modal');
+            modal.classList.remove('hidden');
+            showStep(1);
+        }
+
+        function showStep(stepNumber) {
+            // Hide all steps
+            document.querySelectorAll('[id^="step"]').forEach(step => {
+                if (step.id !== 'step-error') {
+                    step.classList.remove('step-visible');
+                    step.classList.add('step-hidden');
+                }
+            });
+
+            // Show selected step
+            const step = document.getElementById(`step${stepNumber}`);
+            setTimeout(() => {
+                step.classList.remove('step-hidden');
+                step.classList.add('step-visible');
+            }, 50);
+        }
+
+        async function validateApiKey() {
+            const apiKey = document.getElementById('api-key').value;
+            const validateBtn = document.querySelector('#step2 button');
+            const validateText = document.getElementById('validate-text');
+            const spinner = document.getElementById('validate-spinner');
+
+            validateText.classList.add('hidden');
+            spinner.classList.remove('hidden');
+            validateBtn.disabled = true;
+
+            // Simulated API validation
+            setTimeout(() => {
+                if (apiKey.length > 10) { // Simple validation
+                    apiKeys[currentDevice] = apiKey;
+                    showStep(3);
+                    simulateDataSync();
+                } else {
+                    showError('Invalid API key. Please check and try again.');
+                }
+                validateText.classList.remove('hidden');
+                spinner.classList.add('hidden');
+                validateBtn.disabled = false;
+            }, 1500);
+        }
+
+        function simulateDataSync() {
+            setTimeout(() => {
+                // Simulated data
+                const healthData = {
+                    steps: Math.floor(Math.random() * 10000),
+                    heartRate: Math.floor(Math.random() * 40 + 60),
+                    calories: Math.floor(Math.random() * 500 + 1500),
+                    activeMinutes: Math.floor(Math.random() * 120)
+                };
+                
+                displayHealthData(healthData);
+                closeModal();
+                showSuccess();
+            }, 3000);
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('step-error');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+            setTimeout(() => errorDiv.classList.add('hidden'), 3000);
+        }
+
+        function closeModal() {
+            document.getElementById('connection-modal').classList.add('hidden');
+        }
+
+        function showSuccess() {
+            const successDiv = document.getElementById('success-message');
+            successDiv.classList.remove('hidden');
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 2000);
+        }
+
+        // Function to display health data
+        function displayHealthData(data) {
+            const container = document.getElementById('data-container');
+            container.innerHTML = `
+                <div class="data-badge p-4 rounded-lg">
+                    <p class="text-gray-500">Steps</p>
+                    <p class="text-2xl font-bold text-blue-600">${data.steps}</p>
+                </div>
+                <div class="data-badge p-4 rounded-lg">
+                    <p class="text-gray-500">Heart Rate</p>
+                    <p class="text-2xl font-bold text-red-600">${data.heartRate}</p>
+                </div>
+                <div class="data-badge p-4 rounded-lg">
+                    <p class="text-gray-500">Calories</p>
+                    <p class="text-2xl font-bold text-green-600">${data.calories}</p>
+                </div>
+                <div class="data-badge p-4 rounded-lg">
+                    <p class="text-gray-500">Active Minutes</p>
+                    <p class="text-2xl font-bold text-purple-600">${data.activeMinutes}</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
